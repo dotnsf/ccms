@@ -328,7 +328,9 @@ api.post( '/item', async function( req, res ){
   res.contentType( 'application/json; charset=utf-8' );
 
   var item = req.body;
-  item.price = parseInt( item.price );
+  if( item.types.indexOf( "item" ) > -1 && ( "price" in item ) ){
+    item.price = parseInt( item.price );
+  }
 
   api.createItem( item ).then( function( result ){
     res.status( result.status ? 200 : 400 );
@@ -342,7 +344,9 @@ api.post( '/items', async function( req, res ){
 
   var items = req.body;
   for( var i = 0; i < items.length; i ++ ){
-    items[i].price = parseInt( items[i].price );
+    if( items[i].types.indexOf( "item" ) > -1 && ( "price" in items[i] ) ){
+      items[i].price = parseInt( items[i].price );
+    }
   }
 
   api.createItems( items ).then( function( result ){
@@ -461,7 +465,9 @@ api.put( '/item/:id', function( req, res ){
   var item = req.body;
   //item.id = item_id;
   item._id = item_id;
-  item.price = parseInt( item.price );
+  if( item.types.indexOf( "item" ) > -1 && ( "price" in item ) ){
+    item.price = parseInt( item.price );
+  }
   api.updateItem( item ).then( function( result ){
     res.status( result.status ? 200 : 400 );
     res.write( JSON.stringify( result, null, 2 ) );

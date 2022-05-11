@@ -177,7 +177,9 @@ function saveDesignDoc(){
             <input type="text" class="form-control" name="edit_item_id" id="edit_item_id" value="" readonly/>
           </td>
           <td>[ <input type="text" name="edit_item_types" id="edit_item_types" value='item'/> ]</td>
-          <td><textarea class="form-control" name="edit_item_item" id="edit_item_item" cols="5">{}</textarea></td>
+          <td><textarea class="form-control" name="edit_item_item" id="edit_item_item" cols="5">{
+  "name": "名前"
+}</textarea></td>
           <td>
             <button class='btn btn-xs btn-success' onClick='saveItem();'>SAVE</button>
           </td>
@@ -227,7 +229,7 @@ function saveDesignDoc(){
           <td>LISTS</td>
           <td><textarea class="form-control" name="edit_designdoc_lists" id="edit_designdoc_lists" cols="5">{
   "viewname": "function(head, row){
-    start( { 'headers': { 'content-type': 'text/html' } } );
+    start( { 'headers': { 'content-type': 'text/html; charset=utf8' } } );
     send( '<ul>' );
     var row;
     while( row = getRow() ){
