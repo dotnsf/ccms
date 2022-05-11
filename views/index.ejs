@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3c.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml">
+<head>
+<meta charset="utf8"/>
+<meta http-equiv="pragma" content="no-cache"/>
+<script src="//code.jquery.com/jquery-2.2.4.min.js"></script>
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.5.1/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.5.1/js/bootstrap.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="apple-mobile-web-app-title" content="CCMS"/>
+
+<title>CCMS</title>
+<style>
+td,input,textarea{
+  font-size: 10px !important;
+}
+textarea{
+  height: 200px !important;
+}
+</style>
+<script>
+function editItem( item ){
+  $('#edit_item_id').val( item._id );
+  $('#edit_item_types').val( item.types.join( ',' ) );
+  $('#edit_item_item').val( JSON.stringify( item ) );
+}
+
+function deleteItem( item_id ){
+  if( confirm( '削除してよいですか？ : ' + item_id ) ){
+    $.ajax({
+      type: 'DELETE',
+      url: './api/item/' + item_id,
+      success: function( result ){
+        //console.log( result );
+        location.href = './';
+      },
+      error: function( e0, e1, e2 ){
+        console.log( e0, e1, e2 );
+      }
+    });
+  }
+}
+
+function saveItem(){
+  var edit_id = $('#edit_item_id').val();
+  var edit_types = $('#edit_item_types').val();
+  edit_types = edit_types.split( ',' );
+  var edit_item = $('#edit_item_item').val();
+  edit_item = JSON.parse( edit_item );
+
+  var ajax_url = './api/item';
+  var ajax_type = 'POST';
+
+  if( edit_id ){ 
+    edit_item._id = edit_id; 
+    ajax_url = './api/item/' + edit_id;
+    ajax_type = 'PUT';
+  }
+  if( edit_types && edit_types.length > 0 ){ edit_item.types = edit_types; }
+
+  $.ajax({
+    type: ajax_type,
+    url: ajax_url,
+    data: edit_item,
+    success: function( result ){
+      //console.log( result );
+      location.href = './';
+    },
+    error: function( e0, e1, e2 ){
+      console.log( e0, e1, e2 );
+    }
+  });
+}
+
+function editDesignDoc( designdoc ){
+  $('#edit_designdoc_id').val( designdoc._id );
+  $('#edit_designdoc_views').val( designdoc.views ? JSON.stringify( designdoc.views ) : "" );
+  $('#edit_designdoc_lists').val( designdoc.lists ? JSON.stringify( designdoc.lists ) : "" );
+  $('#edit_designdoc_shows').val( designdoc.shows ? JSON.stringify( designdoc.shows ) : "" );
+}
+
+function deleteDesignDoc( designdoc_id ){
+  if( confirm( '削除してよいですか？ : ' + designdoc_id ) ){
+    var ddoc = designdoc_id.split( '/' )[1];
+    $.ajax({
+      type: 'DELETE',
+      url: './api/design/' + ddoc,
+      success: function( result ){
+        //console.log( result );
+        location.href = './';
+      },
+      error: function( e0, e1, e2 ){
+        console.log( e0, e1, e2 );
+      }
+    });
+  }
+}
+
+function saveDesignDoc(){
+  var edit_designdoc_id = $('#edit_designdoc_id').val();
+  var edit_designdoc_views = $('#edit_designdoc_views').val();
+  var edit_designdoc_lists = $('#edit_designdoc_lists').val();
+  var edit_designdoc_shows = $('#edit_designdoc_shows').val();
+
+  edit_designdoc_views = edit_designdoc_views.split( "\r" ).join( "" ).split( "\n" ).join( "" );
+  edit_designdoc_lists = edit_designdoc_lists.split( "\r" ).join( "" ).split( "\n" ).join( "" );
+  edit_designdoc_shows = edit_designdoc_shows.split( "\r" ).join( "" ).split( "\n" ).join( "" );
+
+  //. 文字列のまま送信して、バックエンドで JSON 化する
+
+  var designdoc = {
+    id: edit_designdoc_id,
+    views: edit_designdoc_views, 
+    lists: edit_designdoc_lists, 
+    shows: edit_designdoc_shows 
+  };
+  $.ajax({
+    type: 'POST',
+    url: './api/design',
+    data: designdoc,
+    success: function( result ){
+      //console.log( result );
+      location.href = './';
+    },
+    error: function( e0, e1, e2 ){
+      console.log( e0, e1, e2 );
+    }
+  });
+}
+
+</script>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a id="brand-title" class="navbar-brand" href="#">CCMS</a>
+
+  <!-- //action buttons -->
+  <div style="margin-left: auto;">
+    <ul class="nav navbar-nav">   
+     <li class="nav-item" id="menu_buttons">
+     </li>
+    </ul>
+  </div>
+  <!-- action buttons// -->
+</nav>
+
+<div class="container" id="main_div" style="position: relative; top: 20px;">
+  <ul class="nav nav-tabs">
+    <li class="nav-item"><a href="#items-tab" data-toggle="tab" role="tab" class="nav-link active">Items</a></li>
+    <li class="nav-item"><a href="#designdocs-tab" data-toggle="tab" role="tab" class="nav-link">Design Docs</a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane fade show active" id="items-tab" role="tabpanel">
+      <table class="table table-bordered">
+        <tr>
+          <th>ID</th>
+          <th>TYPES</th>
+          <th>BODY</th>
+          <th>ACTIONS</th>
+        </tr>
+<% for( var i = 0; i < items.length; i ++ ){ %>
+        <tr>
+          <td><%= items[i]._id.substr( 0, 10 ) %>...</td>
+          <td><%= JSON.stringify( items[i].types ) %></td>
+          <td><%= JSON.stringify( items[i] ) %></td>
+          <td>
+            <button class='btn btn-xs btn-warning' onClick='editItem( <%= JSON.stringify( items[i] ) %> );'>EDIT</button>
+            <button class='btn btn-xs btn-danger' onClick='deleteItem( "<%= items[i]._id %>" );'>DELETE</button>
+          </td>
+        </tr>
+<% } %>
+        <tr>
+          <td>
+            <input type="text" class="form-control" name="edit_item_id" id="edit_item_id" value="" readonly/>
+          </td>
+          <td>[ <input type="text" name="edit_item_types" id="edit_item_types" value='item'/> ]</td>
+          <td><textarea class="form-control" name="edit_item_item" id="edit_item_item" cols="5">{}</textarea></td>
+          <td>
+            <button class='btn btn-xs btn-success' onClick='saveItem();'>SAVE</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div class="tab-pane fade" id="designdocs-tab" role="tabpanel">
+      <table class="table table-bordered">
+        <tr>
+          <th>ID</th>
+          <th>VIEWS</th>
+          <th>LISTS</th>
+          <th>SHOWS</th>
+          <th>ACTIONS</th>
+        </tr>
+<% for( var i = 0; i < designdocs.length; i ++ ){ var ddoc = designdocs[i]._id.split('/')[1]; %>
+        <tr>
+          <td><a target="_blank" href="<%= db_url %>/_design/<%= ddoc %>/_list/<%= ddoc %>/<%= ddoc %>"><%= designdocs[i]._id %></a></td>
+          <td><%= JSON.stringify( designdocs[i].views ) %></td>
+          <td><%= JSON.stringify( designdocs[i].lists ) %></td>
+          <td><%= JSON.stringify( designdocs[i].shows ) %></td>
+          <td>
+            <button class='btn btn-xs btn-warning' onClick='editDesignDoc( <%= JSON.stringify( designdocs[i] ) %> );'>EDIT</button>
+            <button class='btn btn-xs btn-danger' onClick='deleteDesignDoc( "<%= designdocs[i]._id %>" );'>DELETE</button>
+          </td>
+        </tr>
+<% } %>
+      </table>
+      <table class="table">
+        <tr>
+          <td>ID</td>
+          <td>
+            <input type="text" class="form-control" name="edit_designdoc_id" id="edit_designdoc_id" value="_design/viewname"/>
+          </td>
+        </tr>
+        <tr>
+          <td>VIEWS</td>
+          <td><textarea class="form-control" name="edit_designdoc_views" id="edit_designdoc_views" cols="5">{
+  "viewindexname": {
+    "map": "function(doc){
+      emit( doc._id, { name: doc.name } );
+    }"
+  }
+}</textarea></td>
+        </tr>
+        <tr>
+          <td>LISTS</td>
+          <td><textarea class="form-control" name="edit_designdoc_lists" id="edit_designdoc_lists" cols="5">{
+  "viewname": "function(head, row){
+    start( { 'headers': { 'content-type': 'text/html' } } );
+    send( '<ul>' );
+    var row;
+    while( row = getRow() ){
+      var url = '../../_show/viewname/';
+      send( ' <li><a href=\"' + url + row.id + '\">' + row.value.name + '</a></li>' );
+    }
+    send( '</ul>' );
+  }"
+}</textarea></td>
+        </tr>
+        <tr>
+          <td>SHOWS</td>
+          <td><textarea class="form-control" name="edit_designdoc_shows" id="edit_designdoc_shows" cols="5">{
+  "viewname": "(function( doc, req ){
+    if( doc ){
+      var str = '<h2>' + doc.name + '</h2>';
+      return str;
+    }else{
+      return 'empty';
+    }
+  })"
+}</textarea></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button class='btn btn-xs btn-success' onClick='saveDesignDoc();'>SAVE</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
